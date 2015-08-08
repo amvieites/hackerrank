@@ -2,7 +2,6 @@ package net.almavi.hackerrank.algorithms;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.Arrays;
 import java.util.Scanner;
 
 /**
