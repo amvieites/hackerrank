@@ -2,12 +2,9 @@ package net.almavi.hackerrank.graphtheory;
 
 import java.io.InputStream;
 import java.io.PrintStream;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Scanner;
+import java.util.*;
 
 /**
- * Most of the code is from the Dijkstra challenge. Just a few improvements like graph revert operation.
  * https://www.hackerrank.com/challenges/rust-murderer
  *
  * Created by Alex on 09/08/2015.
@@ -29,15 +26,14 @@ public class RustAndMurderer {
             int edges = input.nextInt();
             for (int j = 0; j < edges; j++) {
                 // Normalized to start in ZERO
-                graph.add(input.nextInt() - 1, input.nextInt() - 1, DEFAULT_DISTANCE);
+                int n1 = input.nextInt() - 1;
+                int n2 = input.nextInt() - 1;
+                graph.add(n1, n2);
             }
             int start = input.nextInt() - 1;
-            graph.add(start, start, (byte)0);
 
-            printTestCaseResult(out, start, dijkstra(graph.revert(), start));
-            if (i != testCases - 1) {
-                out.print(System.lineSeparator());
-            }
+            printTestCaseResult(out, start, dijkstra(graph, start));
+            out.print(System.lineSeparator());
         }
     }
 
@@ -53,43 +49,36 @@ public class RustAndMurderer {
     public static int[] dijkstra(Graph graph, int start) {
         int[] distances = new int[graph.getSize()];
         for (int i = 0; i < distances.length; i++) {
-            distances[i] = graph.getDistance(start, i);
+            if (i != start) {
+                distances[i] = graph.exists(start, i) ? 1 : -1;
+            }
         }
         boolean[] visited = new boolean[graph.getSize()];
         visited[start] = true;
 
-        int minNode = getMinNodeNotVisited(distances, visited);
-        do {
-            visited[minNode] = true;
+        Queue<Integer> nodes = new LinkedList<Integer>();
+        nodes.add(start);
+        Iterator<Integer> iterator = nodes.iterator();
+        int visitCount = 0;
+        while (iterator.hasNext()) {
+            Integer currentNode = iterator.next();
+            iterator.remove();
+            Set<Integer> adjacent = graph.getNonAdjacentNonVisited(currentNode, visited);
+            visited[currentNode] = true;
+            visitCount++;
 
-            Integer[] adjacent = graph.getAdjacent(minNode);
             for (Integer anAdjacent : adjacent) {
-                if (distances[anAdjacent] == -1) {
-                    if (graph.getDistance(minNode, anAdjacent) > 0) {
-                        distances[anAdjacent] = distances[minNode] + graph.getDistance(minNode, anAdjacent);
-                    }
-                } else {
-                    if (graph.getDistance(minNode, anAdjacent) > 0 && distances[anAdjacent] > distances[minNode] + graph.getDistance(minNode, anAdjacent)) {
-                        distances[anAdjacent] = distances[minNode] + graph.getDistance(minNode, anAdjacent);
-                    }
+                if (!visited[anAdjacent]) {
+                    visited[anAdjacent] = true;
+                    distances[anAdjacent] = distances[currentNode] + 1;
+                    nodes.add(anAdjacent);
                 }
             }
-            minNode = getMinNodeNotVisited(distances, visited);
-        } while (minNode != -1);
+            graph.remove(currentNode);
+            iterator = nodes.iterator();
+        }
 
         return distances;
-    }
-
-    private static int getMinNodeNotVisited(int[] distances, boolean[] visited) {
-        int min = -1;
-        for (int i = 0; i < distances.length; i++) {
-            if (!visited[i]) {
-                if (distances[i] > 0 && (min == -1 || (distances[i] < distances[min] && distances[i] > 0))) {
-                    min = i;
-                }
-            }
-        }
-        return min;
     }
 
     private static void printTestCaseResult(PrintStream out, int start, int[] dijkstra) {
@@ -104,65 +93,57 @@ public class RustAndMurderer {
     }
 
     public static class Graph {
-        private byte[][] distance;
+        private Map<Integer, Set<Integer>> edges = null;
+        private int nodes;
 
-        public Graph(int nodes) {
-            this.distance = new byte[nodes][nodes];
-            this.clear();
-        }
-
-        public void add(int n1, int n2, byte d) {
-            int currentDistance = this.distance[n1][n2];
-            if (currentDistance == -1 || currentDistance > d) {
-                this.distance[n1][n2] = d;
-                this.distance[n2][n1] = d;
+        public Graph(Integer nodes) {
+            this.nodes = nodes;
+            this.edges = new HashMap<Integer, Set<Integer>>();
+            for (int i = 0; i < nodes; i++) {
+                this.edges.put(i, new HashSet<Integer>());
             }
         }
 
-        public int getDistance(int n1, int n2) {
-            return this.distance[n1][n2];
+        public void add(int n1, int n2) {
+            this.edges.get(n1).add(n2);
+            this.edges.get(n2).add(n1);
+        }
+
+        public boolean exists(int n1, int n2) {
+            return this.edges.get(n1).contains(n2);
+        }
+
+        public Set<Integer> getAdjacent(int n) {
+            return this.edges.get(n);
+        }
+
+        public void remove(int n) {
+            this.edges.remove(n);
+            this.nodes--;
         }
 
         public int getSize() {
-            return distance.length;
+            return nodes;
         }
 
-        public Integer[] getAdjacent(int n) {
-            List<Integer> list = new ArrayList<Integer>();
-            for (int i = 0; i < this.distance[n].length; i++) {
-                if (this.getDistance(n, i) > 0) {
+        public Set<Integer> getNonAdjacent(int n) {
+            Set<Integer> list = new HashSet<Integer>();
+            for (int i = 0; i < this.nodes; i++) {
+                if (i != n && !this.edges.get(n).contains(i)) {
                     list.add(i);
                 }
             }
-            return list.toArray(new Integer[0]);
+            return list;
         }
 
-        public Graph revert() {
-            Graph revertedGraph = new Graph(this.getSize());
-
-            for (int i = 0; i < this.getSize(); i++) {
-                for (int j = i; j < this.getSize(); j++) {
-                    if (this.getDistance(i, j) == -1) {
-                        revertedGraph.add(i, j, DEFAULT_DISTANCE);
-                    } else if (this.getDistance(i, j) > 0){
-                        revertedGraph.clear(i, j);
-                    }
+        public Set<Integer> getNonAdjacentNonVisited(int n, boolean[] visited) {
+            Set<Integer> list = new HashSet<Integer>();
+            for (int i = 0; i < this.nodes; i++) {
+                if (!this.edges.get(n).contains(i) && !visited[i]) {
+                    list.add(i);
                 }
             }
-
-            return revertedGraph;
-        }
-
-        private void clear(int n1, int n2) {
-            this.distance[n1][n2] = -1;
-        }
-
-        private void clear() {
-            for (int i = 0; i < this.distance.length; i++) {
-                for (int j = 0; j < this.distance[0].length; j++) {
-                    this.distance[i][j] = -1;
-                }
-            }
+            return list;
         }
     }
 }

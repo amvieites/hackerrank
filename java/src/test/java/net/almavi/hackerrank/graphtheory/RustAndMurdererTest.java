@@ -22,7 +22,7 @@ public class RustAndMurdererTest {
     @Test
     public void testChallengeHR0() throws Exception {
         String inputString = "1\n4 2\n1 2\n1 3\n1";
-        String expected = "2 2 1";
+        String expected = "2 2 1" + System.lineSeparator();
         ByteArrayInputStream in = new ByteArrayInputStream(inputString.getBytes());
 
         RustAndMurderer.challenge(in, new PrintStream(out));
@@ -31,9 +31,9 @@ public class RustAndMurdererTest {
 
     @Test
     public void testHR1() throws Exception {
-        FileInputStream filein = new FileInputStream(getClass().getClassLoader().getResource("graphtheory/rustandmurderer1.in").getFile());
+        FileInputStream filein = new FileInputStream(getClass().getClassLoader().getResource("graphtheory/rustandmurderer1bis.in").getFile());
         StringBuilder expected = new StringBuilder();
-        BufferedReader fileout = new BufferedReader(new FileReader(getClass().getClassLoader().getResource("graphtheory/rustandmurderer1.out").getFile()));
+        BufferedReader fileout = new BufferedReader(new FileReader(getClass().getClassLoader().getResource("graphtheory/rustandmurderer1bis.out").getFile()));
         while(fileout.ready()) {
             expected.append(fileout.readLine()).append(System.lineSeparator());
         }
