@@ -5,6 +5,8 @@ import java.io.PrintStream;
 import java.util.Scanner;
 
 /**
+ * https://www.hackerrank.com/challenges/java-1d-array
+ *
  * Created by Alex on 07/08/2015.
  */
 public class OneDimArray {

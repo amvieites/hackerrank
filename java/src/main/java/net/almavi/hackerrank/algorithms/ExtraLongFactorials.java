@@ -7,6 +7,8 @@ import java.math.MathContext;
 import java.util.Scanner;
 
 /**
+ * https://www.hackerrank.com/challenges/extra-long-factorials
+ *
  * Created by Alex on 07/08/2015.
  */
 public class ExtraLongFactorials {

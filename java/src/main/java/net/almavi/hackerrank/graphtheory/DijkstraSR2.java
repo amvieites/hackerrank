@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Scanner;
 
 /**
+ * https://www.hackerrank.com/challenges/dijkstrashortreach
+ *
  * Created by Alex on 08/08/2015.
  */
 public class DijkstraSR2 {

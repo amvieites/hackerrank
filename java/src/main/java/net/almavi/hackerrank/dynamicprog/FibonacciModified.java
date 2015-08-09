@@ -6,6 +6,8 @@ import java.math.BigInteger;
 import java.util.Scanner;
 
 /**
+ * https://www.hackerrank.com/challenges/fibonacci-modified
+ *
  * Created by Alex on 08/08/2015.
  */
 public class FibonacciModified {
